@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 mod draw;
 
-use draw::line_drawing_system;
+use draw::{line_drawing_system, print_mouse_events_system};
 
 fn main() {
     let mut window_desc = WindowDescriptor::default();
@@ -17,7 +17,8 @@ fn main() {
         // .add_startup_system(add_people.system())
         // .add_system(hello_world.system())
         // .add_system(greet_people.system())
-        .add_system(line_drawing_system.system())
+        // .add_system(line_drawing_system.system())
+        .add_system(print_mouse_events_system)
         .add_system(bevy::input::system::exit_on_esc_system.system())
         .run();
 }
