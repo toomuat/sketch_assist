@@ -13,6 +13,7 @@ fn main() {
         .add_startup_system(add_people.system())
         // .add_system(hello_world.system())
         .add_system(greet_people.system())
+        .add_system(bevy::input::system::exit_on_esc_system.system())
         .run();
 }
 
