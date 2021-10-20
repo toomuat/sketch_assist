@@ -10,7 +10,7 @@ fn main() {
     window_desc.height = 600.0;
     window_desc.title = "Sketch Assist".to_string();
 
-    App::new()
+    App::build()
         .insert_resource(window_desc)
         .add_plugins(DefaultPlugins)
         .insert_resource(ClearColor(Color::rgb(0.7, 0.7, 0.7)))
@@ -28,10 +28,8 @@ fn hello_world() {
     println!("hello world!");
 }
 
-#[derive(Component)]
 struct Person;
 
-#[derive(Component)]
 struct Name(String);
 
 #[allow(dead_code)]
