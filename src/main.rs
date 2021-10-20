@@ -6,10 +6,12 @@ use draw::{line_drawing_system, MouseCoord};
 use std::collections::VecDeque;
 
 fn main() {
-    let mut window_desc = WindowDescriptor::default();
-    window_desc.width = 1300.0;
-    window_desc.height = 600.0;
-    window_desc.title = "Sketch Assist".to_string();
+    let window_desc = WindowDescriptor {
+        width: 1300.0,
+        height: 600.0,
+        title: "Sketch Assist".to_string(),
+        ..Default::default()
+    };
 
     App::build()
         .insert_resource(window_desc)
