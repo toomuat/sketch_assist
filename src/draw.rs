@@ -3,15 +3,32 @@ use bevy::{
     prelude::*,
     window::CursorMoved,
 };
+use std::collections::VecDeque;
 
-pub fn line_drawing_system(mouse_button_input: Res<Input<MouseButton>>) {
+pub struct MouseCoord {
+    pub mouse_coord: VecDeque<Vec2>,
+}
+
+pub fn line_drawing_system(
+    mut state: ResMut<MouseCoord>,
+    mouse_button_input: Res<Input<MouseButton>>,
+    mut cursor_moved_events: EventReader<CursorMoved>,
+) {
     if mouse_button_input.pressed(MouseButton::Left) {
-        info!("left mouse currently pressed");
+        // info!("left mouse currently pressed");
+
+        for event in cursor_moved_events.iter() {
+            // info!("cursor_moved_events: {:?}", event);
+            // info!("cursor_moved_events: {:?}", event.position);
+            // dbg!(event.position.x, event.position.y);
+
+            state.mouse_coord.push_back(event.position);
+        }
     }
 
-    if mouse_button_input.just_pressed(MouseButton::Left) {
-        info!("left mouse just pressed");
-    }
+    // dbg!(state.mouse_coord.len());
+
+    // Connect the line
 }
 
 pub fn print_mouse_events_system(
