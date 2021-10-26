@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 mod draw;
 
-use draw::{line_drawing_system, LineMaterial, MouseCoord};
+use draw::{create_canvas, line_drawing_system, LineMaterial, MouseCoord};
 use std::collections::VecDeque;
 
 fn main() {
@@ -39,4 +39,6 @@ fn setup(
     commands.insert_resource(LineMaterial(
         materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
     ));
+
+    create_canvas(commands, materials, windows);
 }

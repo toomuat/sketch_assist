@@ -3,6 +3,8 @@ use bevy::{
     prelude::*,
     window::CursorMoved,
 };
+use bevy_rapier2d::{physics::RigidBodyBundle, prelude::*};
+use itertools::Itertools;
 use std::collections::VecDeque;
 
 pub struct MouseCoord {
@@ -23,8 +25,44 @@ pub fn line_drawing_system(
             state.mouse_coord.push_back(event.position);
         }
     }
+}
 
-    // Connect the line
+pub fn create_canvas(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    windows: Res<Windows>,
+) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+
+    let window = windows.get_primary().unwrap();
+    let (width, height) = (window.width(), window.height());
+
+    let a = height / 14.0;
+
+    let canvas_width = (width - a * 3.0) / 2.0;
+    let canvas_height = height - a * 2.0;
+
+    // Area of sketch canvas
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(canvas_width, canvas_height)),
+        material: materials.add(Color::WHITE.into()),
+        transform: Transform {
+            translation: Vec3::new(-(width / 2.0 - canvas_width / 2.0 - a), 0., 0.),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+
+    // Area to show images
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(canvas_width, canvas_height)),
+        material: materials.add(Color::WHITE.into()),
+        transform: Transform {
+            translation: Vec3::new(width / 2.0 - canvas_width / 2.0 - a, 0., 0.),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
 }
 
 #[allow(unused)]
