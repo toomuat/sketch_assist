@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 mod draw;
 
+use bevy_rapier2d::physics::{NoUserData, RapierPhysicsPlugin};
 use draw::{create_canvas, line_drawing_system, LineMaterial, MouseCoord};
 use std::collections::VecDeque;
 
@@ -16,6 +17,7 @@ fn main() {
     App::build()
         .insert_resource(window_desc)
         .add_plugins(DefaultPlugins)
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .insert_resource(ClearColor(Color::rgb(0.7, 0.7, 0.7)))
         .add_startup_system(setup.system())
         .add_system(line_drawing_system.system())
