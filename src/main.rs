@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 mod draw;
 
-use draw::{line_drawing_system, MouseCoord};
+use draw::{line_drawing_system, LineMaterial, MouseCoord};
 use std::collections::VecDeque;
 
 fn main() {
@@ -23,8 +23,20 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    windows: Res<Windows>,
+) {
+    let camera_entity = commands
+        .spawn_bundle(OrthographicCameraBundle::new_2d())
+        .id();
+
     commands.insert_resource(MouseCoord {
         mouse_coord: VecDeque::new(),
+        camera_entity,
     });
+    commands.insert_resource(LineMaterial(
+        materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
+    ));
 }

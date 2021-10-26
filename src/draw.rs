@@ -7,7 +7,11 @@ use std::collections::VecDeque;
 
 pub struct MouseCoord {
     pub mouse_coord: VecDeque<Vec2>,
+    pub camera_entity: Entity,
 }
+
+#[derive(Default)]
+pub struct LineMaterial(pub Handle<ColorMaterial>);
 
 pub fn line_drawing_system(
     mut state: ResMut<MouseCoord>,
