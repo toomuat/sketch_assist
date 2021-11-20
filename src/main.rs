@@ -3,13 +3,13 @@ use bevy::prelude::*;
 mod draw;
 
 use bevy_rapier2d::physics::{NoUserData, RapierPhysicsPlugin};
-use draw::{create_canvas, line_drawing_system, LineMaterial, MouseCoord};
+use draw::{clear_window, create_canvas, line_drawing_system, LineMaterial, MouseCoord};
 use std::collections::VecDeque;
 
 fn main() {
     let window_desc = WindowDescriptor {
-        width: 1300.0,
-        height: 600.0,
+        width: 1350.0,
+        height: 700.0,
         title: "Sketch Assist".to_string(),
         ..Default::default()
     };
@@ -21,6 +21,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.7, 0.7, 0.7)))
         .add_startup_system(setup.system())
         .add_system(line_drawing_system.system())
+        .add_system(clear_window.system())
         .add_system(bevy::input::system::exit_on_esc_system.system())
         .run();
 }
