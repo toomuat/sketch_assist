@@ -28,7 +28,6 @@ pub fn line_drawing_system(
 
     if mouse_button_input.pressed(MouseButton::Left) {
         for event in cursor_moved_events.iter() {
-            // state.mouse_coord.push_front(event.position);
             state.mouse_coord.push_front(screen_to_world(
                 event.position,
                 &camera_transform,
@@ -161,9 +160,19 @@ pub fn clear_window(
     windows: Res<Windows>,
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    query: Query<(Entity, &Sprite, &RigidBodyPosition)>,
 ) {
     if keyboard_input.just_pressed(KeyCode::C) {
         create_canvas_(&mut commands, &mut materials, &windows);
+
+        // Remove lines
+        for (entity, _sprite, _rigid_body_pos) in query.iter() {
+            commands
+                .entity(entity)
+                .remove::<Sprite>()
+                .remove_bundle::<SpriteBundle>()
+                .remove_bundle::<RigidBodyBundle>();
+        }
     }
 }
 
@@ -262,15 +271,14 @@ fn create_canvas_(
     let canvas_height = height - a * 2.0;
 
     // Area of sketch canvas on left side
-    commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite::new(Vec2::new(canvas_width, canvas_height)),
-            material: materials.add(Color::WHITE.into()),
-            transform: Transform {
-                translation: Vec3::new(-(width / 2.0 - canvas_width / 2.0 - a), 0., 0.),
-                ..Default::default()
-            },
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(canvas_width, canvas_height)),
+        material: materials.add(Color::WHITE.into()),
+        transform: Transform {
+            translation: Vec3::new(-(width / 2.0 - canvas_width / 2.0 - a), 0., 0.),
             ..Default::default()
+        },
+        ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Static,
