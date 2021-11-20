@@ -156,13 +156,103 @@ fn spawn_line_segment(
         .insert(RigidBodyPositionSync::Discrete);
 }
 
+pub fn clear_window(
+    keyboard_input: Res<Input<KeyCode>>,
+    windows: Res<Windows>,
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::C) {
+        create_canvas_(&mut commands, &mut materials, &windows);
+    }
+}
+
 pub fn create_canvas(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     windows: Res<Windows>,
 ) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
+    create_canvas_(&mut commands, &mut materials, &windows);
+
+    let window = windows.get_primary().unwrap();
+    let (width, height) = (window.width(), window.height());
+    let a = height / 14.0;
+    let canvas_width = (width - a * 3.0) / 2.0;
+    let canvas_height = height - a * 2.0;
+
+    // Setup images on the right canvas
+
+    let texture1 = asset_server.load("axe1.png");
+    let texture2 = asset_server.load("axe2.png");
+    let texture3 = asset_server.load("axe3.png");
+    let texture4 = asset_server.load("axe4.png");
+
+    // Upper left
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(canvas_width / 2., canvas_height / 2.)),
+        material: materials.add(texture1.into()),
+        transform: Transform {
+            translation: Vec3::new(
+                width / 2. - a - canvas_width / 2. - canvas_width / 4.,
+                height / 2. - a - canvas_height / 4.,
+                0.,
+            ),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    // Upper right
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(canvas_width / 2., canvas_height / 2.)),
+        material: materials.add(texture2.into()),
+        transform: Transform {
+            translation: Vec3::new(
+                width / 2. - a - canvas_width / 4.,
+                height / 2. - a - canvas_height / 4.,
+                0.,
+            ),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    // Lower left
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(canvas_width / 2., canvas_height / 2.)),
+        material: materials.add(texture3.into()),
+        transform: Transform {
+            translation: Vec3::new(
+                width / 2. - a - canvas_width / 2. - canvas_width / 4.,
+                -(height / 2. - a - canvas_height / 4.),
+                0.,
+            ),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    // Lower right
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite::new(Vec2::new(canvas_width / 2., canvas_height / 2.)),
+        material: materials.add(texture4.into()),
+        transform: Transform {
+            translation: Vec3::new(
+                width / 2. - a - canvas_width / 4.,
+                -(height / 2. - a - canvas_height / 4.),
+                0.,
+            ),
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+}
+
+fn create_canvas_(
+    commands: &mut Commands,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+    windows: &Res<Windows>,
+) {
     let window = windows.get_primary().unwrap();
     let (width, height) = (window.width(), window.height());
 
@@ -171,18 +261,25 @@ pub fn create_canvas(
     let canvas_width = (width - a * 3.0) / 2.0;
     let canvas_height = height - a * 2.0;
 
-    // Area of sketch canvas
-    commands.spawn_bundle(SpriteBundle {
-        sprite: Sprite::new(Vec2::new(canvas_width, canvas_height)),
-        material: materials.add(Color::WHITE.into()),
-        transform: Transform {
-            translation: Vec3::new(-(width / 2.0 - canvas_width / 2.0 - a), 0., 0.),
+    // Area of sketch canvas on left side
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite::new(Vec2::new(canvas_width, canvas_height)),
+            material: materials.add(Color::WHITE.into()),
+            transform: Transform {
+                translation: Vec3::new(-(width / 2.0 - canvas_width / 2.0 - a), 0., 0.),
+                ..Default::default()
+            },
             ..Default::default()
-        },
-        ..Default::default()
-    });
+        })
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Static,
+            position: (Vec2::new(-(width / 2.0 - canvas_width / 2.0 - a), 0.), 0.).into(),
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete);
 
-    // Area to show images
+    // Area to show images on right side
     commands.spawn_bundle(SpriteBundle {
         sprite: Sprite::new(Vec2::new(canvas_width, canvas_height)),
         material: materials.add(Color::WHITE.into()),

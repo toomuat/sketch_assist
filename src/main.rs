@@ -27,6 +27,7 @@ fn main() {
 
 fn setup(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     windows: Res<Windows>,
 ) {
@@ -42,5 +43,5 @@ fn setup(
         materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
     ));
 
-    create_canvas(commands, materials, windows);
+    create_canvas(commands, asset_server, materials, windows);
 }
