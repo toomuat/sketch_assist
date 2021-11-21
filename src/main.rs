@@ -14,10 +14,14 @@ fn main() {
         ..Default::default()
     };
 
-    App::build()
-        .insert_resource(window_desc)
-        .add_plugins(DefaultPlugins)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+    let mut app = App::build();
+
+    app.insert_resource(window_desc).add_plugins(DefaultPlugins);
+
+    #[cfg(target_arch = "wasm32")]
+    app.add_plugin(bevy_webgl2::WebGL2Plugin);
+
+    app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .insert_resource(ClearColor(Color::rgb(0.7, 0.7, 0.7)))
         .add_startup_system(setup.system())
         .add_system(line_drawing_system.system())
