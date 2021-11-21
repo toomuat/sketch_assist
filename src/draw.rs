@@ -279,13 +279,7 @@ fn create_canvas_(
             ..Default::default()
         },
         ..Default::default()
-        })
-        .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static,
-            position: (Vec2::new(-(width / 2.0 - canvas_width / 2.0 - a), 0.), 0.).into(),
-            ..Default::default()
-        })
-        .insert(RigidBodyPositionSync::Discrete);
+    });
 
     // Area to show images on right side
     commands.spawn_bundle(SpriteBundle {
