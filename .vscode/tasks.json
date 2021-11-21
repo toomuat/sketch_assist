@@ -8,7 +8,7 @@
 				"$rustc"
 			],
 			"label": "rust: cargo run",
-			"args": ["--release"],
+			"args": ["--release", "--features", "native"],
 			"group": {
 				"kind": "build",
 				"isDefault": true
