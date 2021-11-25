@@ -2,9 +2,7 @@ use bevy::prelude::*;
 
 mod draw;
 
-use bevy_rapier2d::physics::{NoUserData, RapierPhysicsPlugin};
-use draw::{clear_window, create_canvas, line_drawing_system, LineMaterial, MouseCoord};
-use std::collections::VecDeque;
+use draw::{clear_canvas, create_canvas, mouse_draw, update_canvas};
 
 fn main() {
     let window_desc = WindowDescriptor {
@@ -21,11 +19,12 @@ fn main() {
     #[cfg(target_arch = "wasm32")]
     app.add_plugin(bevy_webgl2::WebGL2Plugin);
 
-    app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .insert_resource(ClearColor(Color::rgb(0.7, 0.7, 0.7)))
+    app.insert_resource(ClearColor(Color::SILVER))
+        .add_event::<draw::ImageEvent>()
         .add_startup_system(setup.system())
-        .add_system(line_drawing_system.system())
-        .add_system(clear_window.system())
+        .add_system(mouse_draw.system())
+        .add_system(update_canvas.system())
+        .add_system(clear_canvas.system())
         .add_system(bevy::input::system::exit_on_esc_system.system())
         .run();
 }
@@ -33,20 +32,11 @@ fn main() {
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    windows: Res<Windows>,
+    materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let camera_entity = commands
-        .spawn_bundle(OrthographicCameraBundle::new_2d())
-        .id();
+    commands.spawn_bundle(UiCameraBundle::default());
 
-    commands.insert_resource(MouseCoord {
-        mouse_coord: VecDeque::new(),
-        camera_entity,
-    });
-    commands.insert_resource(LineMaterial(
-        materials.add(Color::rgb(0.0, 0.0, 1.0).into()),
-    ));
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
-    create_canvas(commands, asset_server, materials, windows);
+    create_canvas(commands, asset_server, materials);
 }
