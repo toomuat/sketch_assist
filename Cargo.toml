@@ -21,8 +21,11 @@ web = [
 ]
 
 [dependencies]
+anyhow = "1.0.48"
 bevy = {version = "0.5", default-features = false}
 bevy_webgl2 = {version="0.5.0", optional=true}
-winit = {version = "0.24.0"}
-itertools = "0.10.1"
+#winit = {version = "0.24.0"}
+#itertools = "0.10.1"
 image = "0.23.14"
+# tract-onnx = "0.15.5"
+tract-onnx = { git = "https://github.com/toomuat/tract" }
