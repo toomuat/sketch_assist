@@ -2,7 +2,9 @@ use bevy::prelude::*;
 
 mod draw;
 
-use draw::{clear_canvas, create_canvas, mouse_draw, update_canvas};
+use draw::{
+    clear_canvas, create_canvas, mouse_draw, update_canvas, OnnxModelAsset, OnnxModelLoader,
+};
 
 fn main() {
     let window_desc = WindowDescriptor {
@@ -20,6 +22,8 @@ fn main() {
     app.add_plugin(bevy_webgl2::WebGL2Plugin);
 
     app.insert_resource(ClearColor(Color::SILVER))
+        .add_asset::<OnnxModelAsset>()
+        .init_asset_loader::<OnnxModelLoader>()
         .add_event::<draw::ImageEvent>()
         .add_startup_system(setup.system())
         .add_system(mouse_draw.system())

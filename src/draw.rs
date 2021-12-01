@@ -1,8 +1,11 @@
 use bevy::{
+    asset::{AssetLoader, BoxedFuture, LoadContext, LoadedAsset},
     input::mouse::{MouseButtonInput, MouseMotion, MouseWheel},
     prelude::*,
+    reflect::TypeUuid,
     window::CursorMoved,
 };
+use tract_onnx::prelude::*;
 
 pub struct Canvas;
 
@@ -11,7 +14,41 @@ pub enum ImageEvent {
     Clear,
 }
 
-const _INPUT_IMG_SIZE: u32 = 128;
+#[derive(TypeUuid)]
+#[uuid = "ea2073f7-2a59-4983-85cd-6370ea9101a2"]
+pub struct OnnxModelAsset {
+    pub model: SimplePlan<
+        TypedFact,
+        Box<dyn TypedOp>,
+        tract_onnx::prelude::Graph<TypedFact, Box<dyn TypedOp>>,
+    >,
+}
+
+#[derive(Default)]
+pub struct OnnxModelLoader;
+
+impl AssetLoader for OnnxModelLoader {
+    fn load<'a>(
+        &'a self,
+        mut bytes: &'a [u8],
+        load_context: &'a mut LoadContext,
+    ) -> BoxedFuture<'a, Result<(), anyhow::Error>> {
+        Box::pin(async move {
+            let model = tract_onnx::onnx()
+                .model_for_read(&mut bytes)
+                .unwrap()
+                .into_optimized()?
+                .into_runnable()?;
+
+            load_context.set_default_asset(LoadedAsset::new(OnnxModelAsset { model }));
+            Ok(())
+        })
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["onnx"]
+    }
+}
 
 const WINDOW_WIDTH: f32 = 1350.;
 const WINDOW_HEIGHT: f32 = 700.;
