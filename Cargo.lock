@@ -3056,6 +3056,7 @@ dependencies = [
  "bevy_webgl2",
  "image",
  "tract-onnx",
+ "wasm-bindgen",
 ]
 
 [[package]]
