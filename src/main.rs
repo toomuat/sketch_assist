@@ -3,7 +3,7 @@ use bevy::prelude::*;
 mod draw;
 
 use draw::{
-    clear_canvas, create_canvas, mouse_draw, update_canvas, OnnxModelAsset, OnnxModelLoader,
+    clear_canvas, create_canvas, mouse_draw, update_canvas, OnnxModelAsset, OnnxModelLoader, State,
 };
 
 fn main() {
@@ -24,6 +24,7 @@ fn main() {
     app.insert_resource(ClearColor(Color::SILVER))
         .add_asset::<OnnxModelAsset>()
         .init_asset_loader::<OnnxModelLoader>()
+        .init_resource::<State>()
         .add_event::<draw::ImageEvent>()
         .add_startup_system(setup.system())
         .add_system(mouse_draw.system())

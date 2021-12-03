@@ -5,6 +5,7 @@ use bevy::{
     reflect::TypeUuid,
     window::CursorMoved,
 };
+use tract_ndarray::Array;
 use tract_onnx::prelude::*;
 use wasm_bindgen::prelude::*;
 
@@ -50,6 +51,28 @@ impl AssetLoader for OnnxModelLoader {
         &["onnx"]
     }
 }
+
+pub enum InferenceState {
+    Wait,
+    Predict,
+}
+
+pub struct State {
+    pub model: Handle<OnnxModelAsset>,
+    pub inference_state: InferenceState,
+}
+
+impl FromWorld for State {
+    fn from_world(world: &mut World) -> Self {
+        let asset_server = world.get_resource::<AssetServer>().unwrap();
+        State {
+            inference_state: InferenceState::Wait,
+            model: asset_server.load("resnet50.onnx"),
+        }
+    }
+}
+
+const INPUT_IMG_SIZE: u32 = 128;
 
 const WINDOW_WIDTH: f32 = 1350.;
 const WINDOW_HEIGHT: f32 = 700.;
