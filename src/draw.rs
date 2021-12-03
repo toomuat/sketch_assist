@@ -6,6 +6,7 @@ use bevy::{
     window::CursorMoved,
 };
 use tract_onnx::prelude::*;
+use wasm_bindgen::prelude::*;
 
 pub struct Canvas;
 
@@ -57,6 +58,16 @@ const WINDOW_HEIGHT: f32 = 700.;
 const OFFSET: f32 = WINDOW_HEIGHT / 14.;
 const CANVAS_WIDTH: f32 = (WINDOW_WIDTH - OFFSET * 3.0) / 2.0;
 const CANVAS_HEIGHT: f32 = WINDOW_HEIGHT - OFFSET * 2.0;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
 
 pub fn clear_canvas(
     keyboard_input: Res<Input<KeyCode>>,
