@@ -3,7 +3,8 @@ use bevy::prelude::*;
 mod draw;
 
 use draw::{
-    clear_canvas, create_canvas, mouse_draw, update_canvas, OnnxModelAsset, OnnxModelLoader, State,
+    clear_canvas, create_canvas, infer_sketch, mouse_draw, update_canvas, OnnxModelAsset,
+    OnnxModelLoader, State,
 };
 
 fn main() {
@@ -30,6 +31,7 @@ fn main() {
         .add_system(mouse_draw.system())
         .add_system(update_canvas.system())
         .add_system(clear_canvas.system())
+        .add_system(infer_sketch.system())
         .add_system(bevy::input::system::exit_on_esc_system.system())
         .run();
 }

@@ -5,11 +5,14 @@ use bevy::{
     reflect::TypeUuid,
     window::CursorMoved,
 };
+use image::{imageops::FilterType, ImageBuffer, RgbImage};
 use tract_ndarray::Array;
 use tract_onnx::prelude::*;
 use wasm_bindgen::prelude::*;
 
 pub struct Canvas;
+
+pub struct TestCanvas;
 
 pub enum ImageEvent {
     DrawPos(Vec2),
@@ -109,6 +112,72 @@ pub fn clear_canvas(
     }
 }
 
+pub fn infer_sketch(
+    keyboard_input: Res<Input<KeyCode>>,
+    materials: ResMut<Assets<ColorMaterial>>,
+    textures: Res<Assets<Texture>>,
+    models: Res<Assets<OnnxModelAsset>>,
+    state: Res<State>,
+    drawable: Query<&Handle<ColorMaterial>, With<TestCanvas>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::B) {
+        for mat in drawable.iter() {
+            println!("Save image");
+
+            let material = materials.get(mat).unwrap();
+            let texture = textures.get(material.texture.as_ref().unwrap()).unwrap();
+
+            let mut img: RgbImage = ImageBuffer::new(texture.size.width, texture.size.height);
+
+            // Copy image data from texture to ImageBuffer
+            for i in 0..texture.size.width {
+                for j in 0..texture.size.height {
+                    let idx = (i as usize + (j as u32 * texture.size.width) as usize) * 4;
+                    let r = texture.data[idx];
+                    let g = texture.data[idx + 1];
+                    let b = texture.data[idx + 2];
+                    img[(i as u32, j as u32)] = image::Rgb([r, g, b]);
+                }
+            }
+
+            #[cfg(not(target_arch = "wasm32"))]
+            img.save("image.png").unwrap();
+
+            // Imagenet mean and standard deviation
+            let mean = Array::from_shape_vec((1, 3, 1, 1), vec![0.485, 0.456, 0.406]).unwrap();
+            let std = Array::from_shape_vec((1, 3, 1, 1), vec![0.229, 0.224, 0.225]).unwrap();
+
+            let resized = image::imageops::resize(&img, 224, 224, FilterType::Triangle);
+            let tensor_image: Tensor =
+                ((tract_ndarray::Array4::from_shape_fn((1, 3, 224, 224), |(_, c, y, x)| {
+                    resized[(x as _, y as _)][c] as f32 / 255.0
+                }) - mean)
+                    / std)
+                    .into();
+
+            if let Some(model) = models.get(state.model.as_weak::<OnnxModelAsset>()) {
+                let result = model.model.run(tvec!(tensor_image)).unwrap();
+
+                // find and display the max value with its index
+                let best = result[0]
+                    .to_array_view::<f32>()
+                    .unwrap()
+                    .iter()
+                    .cloned()
+                    .zip(1..)
+                    .max_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+                let (score, class) = best.unwrap();
+
+                println!("{} {}", score, class);
+
+                #[cfg(target_arch = "wasm32")]
+                console_log!("{} {}", score, class);
+            }
+        }
+    }
+}
+
 pub fn create_canvas(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -205,6 +274,17 @@ fn create_canvas_(
         })
         .insert(Canvas)
         .insert(Interaction::None);
+
+    commands
+        .spawn_bundle(ImageBundle {
+            material: materials.add(asset_server.load("elephants.png").into()),
+            visible: Visible {
+                is_visible: false,
+                is_transparent: false,
+            },
+            ..Default::default()
+        })
+        .insert(TestCanvas);
 
     clear_inference(
         commands,
