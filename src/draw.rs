@@ -55,9 +55,10 @@ impl AssetLoader for OnnxModelLoader {
     }
 }
 
+#[derive(PartialEq)]
 pub enum InferenceState {
     Wait,
-    Predict,
+    Infer,
 }
 
 pub struct State {
@@ -113,14 +114,23 @@ pub fn clear_canvas(
 }
 
 pub fn infer_sketch(
+    mut image_events: EventReader<ImageEvent>,
     keyboard_input: Res<Input<KeyCode>>,
     materials: ResMut<Assets<ColorMaterial>>,
     textures: Res<Assets<Texture>>,
     models: Res<Assets<OnnxModelAsset>>,
-    state: Res<State>,
+    mut state: ResMut<State>,
     drawable: Query<&Handle<ColorMaterial>, With<TestCanvas>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::B) {
+    // If canvas is cleared and nothing drawed then return without inference
+    for event in image_events.iter() {
+        match event {
+            ImageEvent::Clear => return,
+            _ => (),
+        }
+    }
+
+    if keyboard_input.just_pressed(KeyCode::B) && state.inference_state == InferenceState::Infer {
         for mat in drawable.iter() {
             println!("Save image");
 
@@ -174,6 +184,8 @@ pub fn infer_sketch(
                 #[cfg(target_arch = "wasm32")]
                 console_log!("{} {}", score, class);
             }
+
+            state.inference_state = InferenceState::Wait;
         }
     }
 }
@@ -441,6 +453,16 @@ fn set_pixel(x: i32, y: i32, color: Color, texture: &mut Texture) {
     texture.data[offset] = (color.r() * 255.) as u8;
     texture.data[offset + 1] = (color.g() * 255.) as u8;
     texture.data[offset + 2] = (color.b() * 255.) as u8;
+}
+
+pub fn timer_system(time: Res<Time>, mut state: ResMut<State>, mut query: Query<&mut Timer>) {
+    for mut timer in query.iter_mut() {
+        if timer.tick(time.delta()).finished() {
+            info!("Entity timer just finished");
+
+            state.inference_state = InferenceState::Infer;
+        }
+    }
 }
 
 #[allow(unused)]
