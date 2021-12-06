@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 
 mod draw;
+mod model;
 
-use draw::{
-    clear_canvas, create_canvas, infer_sketch, mouse_draw, timer_system, update_canvas,
-    OnnxModelAsset, OnnxModelLoader, State,
-};
+use draw::{clear_canvas, create_canvas, mouse_draw, update_canvas};
+use model::{infer_sketch, infer_timer, OnnxModelAsset, OnnxModelLoader};
 
 fn main() {
     let window_desc = WindowDescriptor {
@@ -25,14 +24,14 @@ fn main() {
     app.insert_resource(ClearColor(Color::SILVER))
         .add_asset::<OnnxModelAsset>()
         .init_asset_loader::<OnnxModelLoader>()
-        .init_resource::<State>()
+        .init_resource::<model::State>()
         .add_event::<draw::ImageEvent>()
         .add_startup_system(setup.system())
         .add_system(mouse_draw.system())
         .add_system(update_canvas.system())
         .add_system(clear_canvas.system())
         .add_system(infer_sketch.system())
-        .add_system(timer_system.system())
+        .add_system(infer_timer.system())
         .add_system(bevy::input::system::exit_on_esc_system.system())
         .run();
 }
