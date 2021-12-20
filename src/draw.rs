@@ -1,5 +1,8 @@
 use bevy::{
-    input::mouse::{MouseButtonInput, MouseMotion, MouseWheel},
+    input::{
+        mouse::{MouseButtonInput, MouseMotion, MouseWheel},
+        ElementState,
+    },
     prelude::*,
     window::CursorMoved,
 };
@@ -13,15 +16,13 @@ pub enum ImageEvent {
     Clear,
 }
 
-const INPUT_IMG_SIZE: u32 = 128;
-
-const WINDOW_WIDTH: f32 = 1350.;
-const WINDOW_HEIGHT: f32 = 700.;
+pub const WINDOW_WIDTH: f32 = 1350.;
+pub const WINDOW_HEIGHT: f32 = 700.;
 
 // Offset from left top corner
-const OFFSET: f32 = WINDOW_HEIGHT / 14.;
-const CANVAS_WIDTH: f32 = (WINDOW_WIDTH - OFFSET * 3.0) / 2.0;
-const CANVAS_HEIGHT: f32 = WINDOW_HEIGHT - OFFSET * 2.0;
+pub const OFFSET: f32 = WINDOW_HEIGHT / 14.;
+pub const CANVAS_WIDTH: f32 = (WINDOW_WIDTH - OFFSET * 3.0) / 2.0;
+pub const CANVAS_HEIGHT: f32 = WINDOW_HEIGHT - OFFSET * 2.0;
 
 pub fn clear_canvas(
     keyboard_input: Res<Input<KeyCode>>,
@@ -50,6 +51,8 @@ pub fn create_canvas(
     create_canvas_(&mut commands, &mut materials, &asset_server);
 
     // Setup images on the right canvas
+
+    return;
 
     let texture1 = asset_server.load("axe1.png");
     let texture2 = asset_server.load("axe2.png");
@@ -174,6 +177,7 @@ fn clear_inference(
 
 pub fn mouse_draw(
     mut cursor_moved_events: EventReader<CursorMoved>,
+    mut mouse_button_input_events: EventReader<MouseButtonInput>,
     mut image_events: EventWriter<ImageEvent>,
     mut last_mouse_position: Local<Option<Vec2>>,
     drawable: Query<(&Interaction, &GlobalTransform, &Style), With<Canvas>>,
@@ -197,13 +201,6 @@ pub fn mouse_draw(
             } else {
                 0.
             };
-
-            // dbg!(transform.translation);
-            // [examples/ui/ui.rs:89] transform.translation = Vec3(
-            //     400.0,
-            //     320.0,
-            //     0.001,
-            // )
 
             for event in cursor_moved_events.iter() {
                 // info!("{:?}", event.position);
@@ -235,8 +232,14 @@ pub fn mouse_draw(
 
                 *last_mouse_position = Some(event.position);
             }
-        } else {
-            // println!("None");
+        }
+    }
+
+    for event in mouse_button_input_events.iter() {
+        // info!("mouse_button_input_events: {:?}", event);
+
+        if event.state == ElementState::Released {
+            *last_mouse_position = None;
         }
     }
 }
@@ -258,8 +261,8 @@ pub fn update_canvas(
             ImageEvent::DrawPos(pos) => {
                 let x_scale = texture.size.width as f32 / CANVAS_WIDTH;
                 let y_scale = texture.size.height as f32 / CANVAS_HEIGHT;
-                let line_scale = 5;
-                let line_radius = 5;
+                let line_scale = 2;
+                let line_radius = 1;
 
                 for i in -line_radius..=line_radius {
                     for j in -line_radius..=line_radius {
