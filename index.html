@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8"/>
     <style>
-        body {
+        /* body {
             position: relative
         }
 
@@ -15,12 +15,35 @@
             transform: translate(-50%, -50%);
             margin-left: auto;
             margin-right: auto;
-        }
+        } */
     </style>
   </head>
   <script type="module">
     import init from './target/wasm.js'
     init()
-    console.log("aaaaaaaaaaaaaaaaaaa")
+    console.log("Loading WebAssembly...")
   </script>
+
+  <ul>
+    <li>注意：読み込みに少し時間かかります</li>
+    <li>
+      操作方法
+      <ul>
+        <li>B : 推論を実行</li>
+        <li>C : 画面をクリア</li>
+      </ul>
+    </li>
+    <li>
+      識別できるクラスは現状次の3クラス.<br>
+      リンク先は学習に使用した<a href="https://quickdraw.withgoogle.com/data">Quick Draw Dataset</a>のスケッチの画像
+      <ul>
+        <li><a href="https://quickdraw.withgoogle.com/data/rabbit">Rabbit</a></li>
+        <li><a href="https://quickdraw.withgoogle.com/data/axe">Axe</a></li>
+        <li><a href="https://quickdraw.withgoogle.com/data/smiley_face">Smiley face</a></li>
+      </ul>
+    </li>
+    <li>テストデータの正解率は90%を超えましたが, 実際に書いたスケッチを入力すると
+      ミスが多く学習データのように丁寧に書く必要があります.
+    </li>
+  </ul>
 </html>
